@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Setup Tutorial</title>
+<style>
+  :root {
+    --blue:       #2E5FA3;
+    --blue-dark:  #1A3E6E;
+    --blue-light: #EBF2FC;
+    --gold:       #C8922A;
+    --gold-light: #FDF3E3;
+    --green:      #2D6A4F;
+    --green-light:#D8F3DC;
+    --red:        #B03030;
+    --code-bg:    #1E2433;
+    --code-fg:    #E8EAF0;
+    --ink:        #1A1A2E;
+    --ink-mid:    #4A4A6A;
+    --rule:       #DDE3EE;
+    --bg:         #F7F8FC;
+    --white:      #FFFFFF;
+    --mono:       ui-monospace, 'SF Mono', Menlo, Consolas, 'Courier New', monospace;
+    --serif:      Georgia, 'Times New Roman', serif;
+    --sans:       -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--sans); background: var(--bg); color: var(--ink); line-height: 1.7; font-size: 16px; }
+  .page { max-width: 820px; margin: 0 auto; padding: 0 24px 80px; }
+
+  /* ── Cover ── */
+  .cover {
+    background: linear-gradient(145deg, var(--blue-dark) 0%, var(--blue) 60%, #4A7EC7 100%);
+    margin: 0 -24px 48px; padding: 64px 48px 56px;
+    position: relative; overflow: hidden;
+  }
+  .cover::before { content: ''; position: absolute; top: -60px; right: -60px; width: 320px; height: 320px; border-radius: 50%; background: rgba(255,255,255,0.04); }
+  .cover::after  { content: ''; position: absolute; bottom: -40px; left: 30%; width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,0.03); }
+  .cover-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 16px; }
+  .cover h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(32px,5vw,48px); color: #fff; line-height: 1.15; margin-bottom: 12px; }
+  .cover-sub { font-size: 18px; color: rgba(255,255,255,0.75); margin-bottom: 32px; }
+  .cover-meta { display: flex; gap: 24px; flex-wrap: wrap; }
+  .cover-badge { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 5px 12px; font-size: 13px; color: rgba(255,255,255,0.85); font-family: var(--mono); }
+
+  /* ── OS Toggle ── */
+  .os-toggle-wrap {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--white); border: 1px solid var(--rule);
+    border-radius: 10px; padding: 18px 24px; margin-bottom: 40px;
+  }
+  .os-toggle-label { font-size: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+  .os-toggle { display: flex; background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+  .os-btn {
+    padding: 8px 20px; font-size: 14px; font-weight: 500; cursor: pointer;
+    border: none; background: transparent; color: var(--ink-mid);
+    font-family: var(--sans); transition: background 0.15s, color 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .os-btn.active { background: var(--blue); color: #fff; }
+  .os-btn:not(.active):hover { background: var(--blue-light); color: var(--blue); }
+  .os-note { font-size: 13px; color: var(--ink-mid); margin-left: auto; font-style: italic; }
+
+  /* ── OS conditional content ── */
+  .mac-only, .win-only { transition: opacity 0.15s; }
+  body.os-win .mac-only { display: none; }
+  body.os-mac .win-only { display: none; }
+
+  /* ── Intro ── */
+  .intro { background: var(--white); border-left: 4px solid var(--blue); border-radius: 0 8px 8px 0; padding: 24px 28px; margin-bottom: 48px; font-size: 15px; color: var(--ink-mid); }
+  .intro strong { color: var(--ink); }
+
+  /* ── TOC ── */
+  .toc { background: var(--white); border: 1px solid var(--rule); border-radius: 8px; padding: 28px 32px; margin-bottom: 60px; }
+  .toc-title { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-mid); margin-bottom: 16px; }
+  .toc ol { list-style: none; }
+  .toc li { display: flex; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--rule); }
+  .toc li:last-child { border-bottom: none; }
+  .toc-num { font-family: var(--mono); font-size: 11px; color: var(--blue); flex-shrink: 0; width: 24px; }
+  .toc a { color: var(--ink); text-decoration: none; font-weight: 500; font-size: 15px; flex: 1; }
+  .toc a:hover { color: var(--blue); }
+
+  /* ── Module header ── */
+  .module-header { display: flex; align-items: stretch; border-radius: 8px; overflow: hidden; margin: 60px 0 32px; box-shadow: 0 2px 12px rgba(46,95,163,0.15); }
+  .module-number { background: var(--blue-dark); color: rgba(255,255,255,0.45); font-family: var(--mono); font-size: 32px; font-weight: 500; writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); padding: 20px 14px; display: flex; align-items: center; justify-content: center; min-width: 52px; }
+  .module-body { background: var(--blue); flex: 1; padding: 20px 24px; }
+  .module-title { font-family: var(--serif); font-weight: 600; font-size: 22px; color: #fff; }
+
+  /* ── Typography ── */
+  h2 { font-family: var(--sans); font-weight: 600; font-size: 18px; color: var(--ink); margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); }
+  h3 { font-family: var(--mono); font-size: 11px; color: var(--blue); margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+  p { margin-bottom: 14px; font-size: 15px; color: var(--ink-mid); }
+  p strong { color: var(--ink); }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── Steps ── */
+  .steps { margin: 16px 0 24px; }
+  .step { display: flex; gap: 16px; margin-bottom: 24px; align-items: flex-start; }
+  .step-num { flex-shrink: 0; background: var(--blue); color: #fff; font-family: var(--mono); font-size: 12px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+  .step-body { flex: 1; min-width: 0; }
+  .step-body p { margin-bottom: 10px; }
+  .step-body p:last-child { margin-bottom: 0; }
+  .step-body .code-block { margin-top: 10px; }
+  .step-body .bullets { margin-top: 8px; }
+
+  /* ── Bullets ── */
+  .bullets { list-style: none; margin: 12px 0 20px; }
+  .bullets li { padding: 5px 0 5px 20px; position: relative; font-size: 15px; color: var(--ink-mid); }
+  .bullets li::before { content: '–'; position: absolute; left: 0; color: var(--blue); font-weight: 600; }
+
+  /* ── Inline code ── */
+  code { font-family: var(--mono); font-size: 13px; background: #EEF2FA; color: var(--blue-dark); padding: 1px 5px; border-radius: 3px; }
+
+  /* ── Code block ── */
+  .code-block { background: var(--code-bg); border-radius: 8px; margin: 12px 0 18px; overflow: hidden; }
+  .code-label { background: rgba(255,255,255,0.06); padding: 6px 16px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.35); border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .code-block pre { padding: 16px 20px; font-family: var(--mono); font-size: 13.5px; color: var(--code-fg); line-height: 1.7; overflow-x: auto; white-space: pre; margin: 0; }
+  .code-block pre .comment { color: #6272A4; font-style: italic; }
+
+  /* ── Callouts ── */
+  .callout { border-radius: 8px; padding: 18px 22px; margin: 20px 0; }
+  .callout-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; margin-bottom: 8px; }
+  .callout p { font-size: 14px; margin-bottom: 8px; color: var(--ink-mid); }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout-note    { background: var(--blue-light); border-left: 3px solid var(--blue); }
+  .callout-note .callout-label { color: var(--blue); }
+  .callout-success { background: var(--green-light); border-left: 3px solid var(--green); }
+  .callout-success .callout-label { color: var(--green); }
+  .callout-warning { background: var(--gold-light); border-left: 3px solid var(--gold); }
+  .callout-warning .callout-label { color: var(--gold); }
+
+  /* ── Reference table ── */
+  .ref-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 20px 0; border-radius: 8px; overflow: hidden; border: 1px solid var(--rule); }
+  .ref-table thead th { background: var(--blue); color: #fff; font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; padding: 10px 16px; text-align: left; }
+  .ref-table tbody tr:nth-child(even) { background: var(--blue-light); }
+  .ref-table tbody tr:nth-child(odd)  { background: var(--white); }
+  .ref-table td { padding: 9px 16px; vertical-align: middle; color: var(--ink-mid); }
+  .ref-table td:first-child { font-family: var(--mono); font-size: 12px; color: var(--red); }
+
+  .divider { border: none; border-top: 1px solid var(--rule); margin: 48px 0; }
+  .footer { text-align: center; padding: 48px 0 0; font-family: var(--mono); font-size: 12px; color: var(--ink-mid); border-top: 1px solid var(--rule); }
+
+  @media (max-width: 600px) { .cover { padding: 40px 24px; } .toc { padding: 20px; } .os-toggle-wrap { flex-wrap: wrap; } .os-note { margin-left: 0; } }
+</style>
+</head>
+<body class="os-mac">
+<div class="page">
+
+  <!-- Cover -->
+  <div class="cover">
+    <div class="cover-eyebrow">Tutorial Guide</div>
+    <h1>Claude Code<br>Setup Session</h1>
+    <div class="cover-sub">A step-by-step guide for complete beginners</div>
+    <div class="cover-meta">
+      <span class="cover-badge">⏱ 60 minutes</span>
+      <span class="cover-badge">No coding experience required</span>
+    </div>
+  </div>
+
+  <!-- OS Toggle -->
+  <div class="os-toggle-wrap">
+    <span class="os-toggle-label">I'm using:</span>
+    <div class="os-toggle">
+      <button class="os-btn active" onclick="setOS('mac')">🍎 macOS</button>
+      <button class="os-btn" onclick="setOS('win')">🪟 Windows</button>
+    </div>
+    <span class="os-note">OS-specific steps will update automatically</span>
+  </div>
+
+  <!-- Intro -->
+  <div class="intro">
+    <p>Welcome! This guide walks you through everything you need before the Claude Code tutorial. By the end you'll have all the tools installed, connected, and verified — and you'll have already had your first conversation with Claude Code.</p>
+    <p style="margin-top:10px;margin-bottom:0"><strong>No experience needed.</strong> Every step is explained in plain English, and every command you need to type is shown exactly as it should appear.</p>
+  </div>
+
+  <div class="callout callout-note win-only">
+    <div class="callout-label">📝 A note on Windows</div>
+    <p>Claude Code runs in <strong>Git Bash</strong> on Windows — a terminal that comes bundled with Git for Windows. You'll install it in Module 1. From that point on, all the commands in this guide are typed into Git Bash, not the standard Command Prompt or PowerShell.</p>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-title">What we'll cover</div>
+    <ol>
+      <li><span class="toc-num">01</span><a href="#module1" class="mac-only">The Terminal</a><a href="#module1" class="win-only">Git Bash — Your Terminal on Windows</a></li>
+      <li><span class="toc-num">02</span><a href="#module2">Git &amp; GitHub</a></li>
+      <li><span class="toc-num">03</span><a href="#module3">Connecting Git and GitHub</a></li>
+      <li><span class="toc-num">04</span><a href="#module4">Claude Code Installation</a></li>
+      <li><span class="toc-num">05</span><a href="#module5">First Steps with Claude Code</a></li>
+      <li><span class="toc-num">06</span><a href="#wrapup">Wrap-Up &amp; Reference</a></li>
+    </ol>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       MODULE 1
+  ════════════════════════════════════════════════════════ -->
+  <div class="module-header" id="module1">
+    <div class="module-number">01</div>
+    <div class="module-body">
+      <div class="module-title mac-only">The Terminal</div>
+      <div class="module-title win-only">Git Bash — Your Terminal on Windows</div>
+    </div>
+  </div>
+
+  <!-- MAC: Module 1 -->
+  <div class="mac-only">
+    <h2>Opening the Terminal</h2>
+    <p>The terminal is already on your Mac — you just need to find it.</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><p>Press <strong>⌘ Command</strong> and <strong>Space bar</strong> at the same time. A search bar appears — this is Spotlight.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><p>Type <strong>Terminal</strong> and press <strong>Return</strong>.</p></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><p>A window opens with a blinking cursor. That's the terminal.</p></div></div>
+    </div>
+    <div class="callout callout-note">
+      <div class="callout-label">💡 Tip</div>
+      <p>Keep Terminal in your Dock: right-click its icon and choose <strong>Options → Keep in Dock</strong>.</p>
+    </div>
+
+    <h2>What You're Looking At</h2>
+    <p>You'll see something like this:</p>
+    <div class="code-block"><div class="code-label">Terminal prompt</div><pre>yourname@MacBook ~ %</pre></div>
+    <p>This is the <strong>prompt</strong> — the terminal's way of saying "I'm ready." The <code>%</code> at the end is where you start typing.</p>
+
+    <h2>Your First Commands</h2>
+    <h3>Find out where you are</h3>
+    <div class="code-block"><div class="code-label">Type this</div><pre>pwd</pre></div>
+    <p><em>Print working directory.</em> Shows the folder you're currently in, e.g. <code>/Users/yourname</code>.</p>
+
+    <h3>See what's in this folder</h3>
+    <div class="code-block"><div class="code-label">Type this</div><pre>ls</pre></div>
+    <p><em>List.</em> Shows files and folders at your current location.</p>
+
+    <div class="callout callout-success">
+      <div class="callout-label">✅ You did it!</div>
+      <p>Output from both commands means you're navigating the terminal. That's the part most beginners find intimidating — and you've already done it.</p>
+    </div>
+
+    <h2>Moving Between Folders</h2>
+    <p><code>cd</code> stands for <em>change directory</em>.</p>
+    <h3>Move into a folder</h3>
+    <div class="code-block"><div class="code-label">Example</div><pre>cd Desktop</pre></div>
+    <h3>Go up one level</h3>
+    <div class="code-block"><div class="code-label">Example</div><pre>cd ..</pre></div>
+    <p>Run <code>pwd</code> any time to check where you are.</p>
+    <h3>Open the current folder in Finder</h3>
+    <div class="code-block"><div class="code-label">Example</div><pre>open .</pre></div>
+  </div>
+
+  <!-- WINDOWS: Module 1 -->
+  <div class="win-only">
+    <h2>Why Git Bash?</h2>
+    <p>Windows has its own terminals (Command Prompt and PowerShell), but Claude Code requires a Unix-style terminal to run. <strong>Git Bash</strong> provides this, and it comes bundled with Git for Windows — so you get both tools in one install.</p>
+
+    <h2>Installing Git for Windows (includes Git Bash)</h2>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><p>Go to <a href="https://git-scm.com/downloads/win">git-scm.com/downloads/win</a> and click <strong>Download for Windows</strong>.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><p>Run the installer. Most defaults are fine. On the screen <strong>"Choosing the default editor"</strong>, change from Vim to <strong>Notepad</strong> (or Visual Studio Code if you have it) — Vim is very unfamiliar to beginners.</p></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><p>On <strong>"Adjusting your PATH environment"</strong>, leave the default: <em>Git from the command line and also from 3rd-party software</em>.</p></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><p>Accept all other defaults and click <strong>Finish</strong>.</p></div></div>
+    </div>
+
+    <h2>Opening Git Bash</h2>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><p>Press the <strong>Windows key</strong>, type <strong>Git Bash</strong>, and press <strong>Enter</strong>.</p></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><p>A dark window opens with a blinking cursor. This is Git Bash — your terminal for the rest of this session.</p></div></div>
+    </div>
+    <div class="callout callout-note">
+      <div class="callout-label">💡 Tip</div>
+      <p>Pin Git Bash to your taskbar: right-click its icon while it's open and choose <strong>Pin to taskbar</strong>.</p>
+    </div>
+
+    <h2>What You're Looking At</h2>
+    <p>You'll see something like this:</p>
+    <div class="code-block"><div class="code-label">Git Bash prompt</div><pre>yourname@DESKTOP-XXXXX MINGW64 ~
+$</pre></div>
+    <p>This is the <strong>prompt</strong>. The <code>$</code> on the second line is where you start typing. Don't worry about the rest.</p>
+
+    <h2>Your First Commands</h2>
+    <h3>Find out where you are</h3>
+    <div class="code-block"><div class="code-label">Type this</div><pre>pwd</pre></div>
+    <p><em>Print working directory.</em> Shows the folder you're in, e.g. <code>/c/Users/yourname</code>.</p>
+
+    <h3>See what's in this folder</h3>
+    <div class="code-block"><div class="code-label">Type this</div><pre>ls</pre></div>
+    <p><em>List.</em> Shows files and folders at your current location.</p>
+
+    <div class="callout callout-success">
+      <div class="callout-label">✅ You did it!</div>
+      <p>Output from both commands means you're navigating the terminal. That's the part most beginners find intimidating — and you've already done it.</p>
+    </div>
+
+    <h2>Moving Between Folders</h2>
+    <p><code>cd</code> stands for <em>change directory</em>.</p>
+    <h3>Move into a folder</h3>
+    <div class="code-block"><div class="code-label">Example</div><pre>cd Desktop</pre></div>
+    <h3>Go up one level</h3>
+    <div class="code-block"><div class="code-label">Example</div><pre>cd ..</pre></div>
+    <p>Run <code>pwd</code> any time to check where you are.</p>
+    <h3>Open the current folder in File Explorer</h3>
+    <div class="code-block"><div class="code-label">Example</div><pre>explorer .</pre></div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       MODULE 2
+  ════════════════════════════════════════════════════════ -->
+  <div class="module-header" id="module2">
+    <div class="module-number">02</div>
+    <div class="module-body"><div class="module-title">Git &amp; GitHub</div></div>
+  </div>
+
+  <h2>What is Git?</h2>
+  <p><strong>Git</strong> is a tool that tracks the history of changes you make to files. Think of it like Google Docs version history — except it works for any file, and you control when each snapshot is saved. Every snapshot is called a <em>commit</em>.</p>
+
+  <h2>What is GitHub?</h2>
+  <p><strong>GitHub</strong> is a website that stores your Git history in the cloud. Git runs on your computer; GitHub stores your work online. Together they give you:</p>
+  <ul class="bullets">
+    <li>A backup that isn't tied to your computer</li>
+    <li>A way to share your work with others</li>
+    <li>A place to publish websites for free (covered in the main tutorial)</li>
+  </ul>
+
+  <!-- MAC: Install Git -->
+  <div class="mac-only">
+    <h2>Step 1: Install Git</h2>
+    <p>The easiest way on a Mac is through the Xcode Command Line Tools:</p>
+    <div class="code-block"><div class="code-label">Terminal</div><pre>xcode-select --install</pre></div>
+    <p>A pop-up will appear — click <strong>Install</strong> and wait a few minutes. Then verify:</p>
+    <div class="code-block"><div class="code-label">Terminal</div><pre>git --version</pre></div>
+    <p>Any version number means Git is installed.</p>
+  </div>
+
+  <!-- WINDOWS: Git already installed -->
+  <div class="win-only">
+    <h2>Step 1: Verify Git is Installed</h2>
+    <p>Git was installed alongside Git Bash in Module 1. Confirm it's working:</p>
+    <div class="code-block"><div class="code-label">Git Bash</div><pre>git --version</pre></div>
+    <p>You should see a version number. If not, re-run the Git for Windows installer.</p>
+  </div>
+
+  <h2>Step 2: Tell Git Who You Are</h2>
+  <p>Run these two commands, replacing the placeholders with your own details:</p>
+  <div class="code-block">
+    <div class="code-label mac-only">Terminal — run both lines</div>
+    <div class="code-label win-only">Git Bash — run both lines</div>
+    <pre>git config --global user.name "Your Name"
+git config --global user.email "you&#64;example.com"</pre>
+  </div>
+  <p>Then confirm the settings were saved:</p>
+  <div class="code-block">
+    <div class="code-label mac-only">Terminal</div>
+    <div class="code-label win-only">Git Bash</div>
+    <pre>git config --list</pre>
+  </div>
+  <p>Look for lines starting with <code>user.name</code> and <code>user.email</code> in the output.</p>
+  <div class="callout callout-note">
+    <div class="callout-label">📝 Note</div>
+    <p>Use the same email address you'll use for your GitHub account.</p>
+  </div>
+
+  <h2>Step 3: Create a GitHub Account</h2>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-body"><p>Go to <a href="https://github.com">github.com</a> and click <strong>Sign up</strong>.</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><p>Choose a username — it will appear in your project URLs.</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><p>Verify your email address when the confirmation arrives.</p></div></div>
+  </div>
+  <div class="callout callout-warning">
+    <div class="callout-label">⚠️ Watch out</div>
+    <p>Email verification can take a few minutes. Check your spam folder if you don't see it.</p>
+  </div>
+
+  <h2>Step 4: Set Up SSH Authentication</h2>
+  <p>SSH is the recommended way to connect your terminal to GitHub. It's more secure than a password, and once set up you'll never be prompted for credentials again.</p>
+  <p>SSH works with a key pair: a <strong>private key</strong> that stays on your computer, and a <strong>public key</strong> you share with GitHub. When you push code, they match up automatically.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <p>Check whether you already have an SSH key:</p>
+        <div class="code-block">
+          <div class="code-label mac-only">Terminal</div>
+          <div class="code-label win-only">Git Bash</div>
+          <pre>ls ~/.ssh</pre>
+        </div>
+        <p>If you see <code>id_ed25519</code> and <code>id_ed25519.pub</code>, skip to step 3. Otherwise continue.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <p>Generate a new SSH key (use your GitHub email):</p>
+        <div class="code-block">
+          <div class="code-label mac-only">Terminal</div>
+          <div class="code-label win-only">Git Bash</div>
+          <pre>ssh-keygen -t ed25519 -C "you&#64;example.com"</pre>
+        </div>
+        <p class="mac-only">Press <strong>Return</strong> to accept the default location. When asked for a passphrase, press Return to skip — macOS Keychain handles security automatically.</p>
+        <p class="win-only">Press <strong>Enter</strong> to accept the default location. When asked for a passphrase, you can press Enter to skip, or enter one for extra security.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body mac-only">
+        <p>Add the key to your Mac's SSH agent:</p>
+        <div class="code-block"><div class="code-label">Terminal</div><pre>ssh-add --apple-use-keychain ~/.ssh/id_ed25519</pre></div>
+      </div>
+      <div class="step-body win-only">
+        <p>Start the SSH agent and add your key:</p>
+        <div class="code-block"><div class="code-label">Git Bash</div><pre>eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519</pre></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <p>Copy your public key to the clipboard:</p>
+        <div class="code-block mac-only"><div class="code-label">Terminal</div><pre>pbcopy &lt; ~/.ssh/id_ed25519.pub</pre></div>
+        <div class="code-block win-only"><div class="code-label">Git Bash</div><pre>clip &lt; ~/.ssh/id_ed25519.pub</pre></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <p>Add it to GitHub:</p>
+        <ul class="bullets">
+          <li>Go to <a href="https://github.com/settings/keys">github.com/settings/keys</a></li>
+          <li>Click <strong>New SSH key</strong></li>
+          <li>Give it a name like <em class="mac-only">My MacBook</em><em class="win-only">My Windows PC</em></li>
+          <li>Paste into the Key field (<strong class="mac-only">⌘V</strong><strong class="win-only">Ctrl+V</strong>) and click <strong>Add SSH key</strong></li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <p>Test the connection:</p>
+        <div class="code-block">
+          <div class="code-label mac-only">Terminal</div>
+          <div class="code-label win-only">Git Bash</div>
+          <pre>ssh -T git&#64;github.com</pre>
+        </div>
+        <p>If asked whether to trust github.com, type <strong>yes</strong> and press <strong class="mac-only">Return</strong><strong class="win-only">Enter</strong>. You should see: <code>Hi username! You've successfully authenticated</code>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-success">
+    <div class="callout-label">✅ You did it!</div>
+    <p>The "successfully authenticated" message means Git and GitHub are connected. You won't need to enter credentials again on this machine.</p>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       MODULE 3
+  ════════════════════════════════════════════════════════ -->
+  <div class="module-header" id="module3">
+    <div class="module-number">03</div>
+    <div class="module-body"><div class="module-title">Connecting Git and GitHub</div></div>
+  </div>
+
+  <h2>Clone a Public Repository</h2>
+  <p>To <strong>clone</strong> a repository means to download a complete copy — including its full history — to your computer.</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <p>Navigate to your Desktop:</p>
+        <div class="code-block mac-only"><div class="code-label">Terminal</div><pre>cd ~/Desktop</pre></div>
+        <div class="code-block win-only"><div class="code-label">Git Bash</div><pre>cd ~/Desktop</pre></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <p>Clone the tutorial repository:</p>
+        <div class="code-block">
+          <div class="code-label mac-only">Terminal</div>
+          <div class="code-label win-only">Git Bash</div>
+          <pre>git clone git&#64;github.com:WomenDefiningAI/claude-code-skills.git</pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <p>Move into the folder that was created:</p>
+        <div class="code-block">
+          <div class="code-label mac-only">Terminal</div>
+          <div class="code-label win-only">Git Bash</div>
+          <pre>cd claude-code-skills</pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <p>Open the folder to see what was downloaded:</p>
+        <div class="code-block mac-only"><div class="code-label">Terminal</div><pre>open .</pre></div>
+        <div class="code-block win-only"><div class="code-label">Git Bash</div><pre>explorer .</pre></div>
+      </div>
+    </div>
+  </div>
+  <p>Take a moment to browse the files. In Module 5 you'll ask Claude to explain what's here.</p>
+
+  <h2>Create Your Own Private Repository</h2>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-body"><p>On GitHub, click the <strong>+</strong> icon (top-right) → <strong>New repository</strong>.</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><p>Name it <code>my-first-repo</code> and set the visibility to <strong>Private</strong>.</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><p>Leave "Initialize this repository" <strong>unchecked</strong> — you'll push files from your computer.</p></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-body"><p>Click <strong>Create repository</strong>. Keep this tab open — you'll need the SSH URL shortly.</p></div></div>
+  </div>
+
+  <h2>Push Your First Code to GitHub</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <p>Create a new project folder on your Desktop:</p>
+        <div class="code-block">
+          <div class="code-label mac-only">Terminal</div>
+          <div class="code-label win-only">Git Bash</div>
+          <pre>cd ~/Desktop
+mkdir my-first-repo
+cd my-first-repo</pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <p>Initialize it as a Git repository:</p>
+        <div class="code-block">
+          <div class="code-label mac-only">Terminal</div>
+          <div class="code-label win-only">Git Bash</div>
+          <pre>git init</pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <p>Create a placeholder file:</p>
+        <div class="code-block">
+          <div class="code-label mac-only">Terminal</div>
+          <div class="code-label win-only">Git Bash</div>
+          <pre>echo "# My First Repo" &gt; README.md</pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <p>Stage the file, then check what Git is about to commit:</p>
+        <div class="code-block">
+          <div class="code-label mac-only">Terminal</div>
+          <div class="code-label win-only">Git Bash</div>
+          <pre>git add .
+git status</pre>
+        </div>
+        <p>You'll see <code>README.md</code> listed under "Changes to be committed" in green — Git's way of showing what will be included in the next snapshot.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <p>Save the snapshot, then view your commit history:</p>
+        <div class="code-block">
+          <div class="code-label mac-only">Terminal</div>
+          <div class="code-label win-only">Git Bash</div>
+          <pre>git commit -m "First commit"
+git log --oneline</pre>
+        </div>
+        <p>You'll see a one-line entry with a short ID and your commit message. Every commit you make will appear here — this is your project's full history.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <p>Connect your local folder to GitHub. On the GitHub page you kept open, copy the SSH URL (starts with <code>git&#64;github.com:</code>) and paste it here:</p>
+        <div class="code-block">
+          <div class="code-label mac-only">Terminal</div>
+          <div class="code-label win-only">Git Bash</div>
+          <pre>git remote add origin git&#64;github.com:YOUR-USERNAME/my-first-repo.git</pre>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">7</div>
+      <div class="step-body">
+        <p>Push your code to GitHub:</p>
+        <div class="code-block">
+          <div class="code-label mac-only">Terminal</div>
+          <div class="code-label win-only">Git Bash</div>
+          <pre>git push -u origin main</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-success">
+    <div class="callout-label">✅ You did it!</div>
+    <p>Refresh your GitHub repository page — <code>README.md</code> should have appeared. You just pushed code from your computer to the cloud, with no passwords required.</p>
+  </div>
+
+  <h2>Branches: Exploring Ideas in Parallel</h2>
+  <p>A <strong>branch</strong> is an independent copy of your project where you can try something new without touching the main version. If the result is good, you merge it back. If not, you discard it. This is especially powerful with Claude Code — Claude works in a branch, and you only merge when you're happy with the result.</p>
+
+  <h3>Create a branch and switch to it</h3>
+  <div class="code-block">
+    <div class="code-label mac-only">Terminal</div>
+    <div class="code-label win-only">Git Bash</div>
+    <pre>git checkout -b my-first-branch</pre>
+  </div>
+  <p>The <code>-b</code> flag means "create and switch." Run <code>git branch</code> to confirm — the current branch has a <code>*</code> next to it.</p>
+
+  <h3>Make a change, commit, and push the branch</h3>
+  <div class="code-block">
+    <div class="code-label mac-only">Terminal</div>
+    <div class="code-label win-only">Git Bash</div>
+    <pre>echo "Experimenting on a branch" &gt;&gt; README.md
+git add .
+git commit -m "Try something on a branch"
+git push -u origin my-first-branch</pre>
+  </div>
+
+  <h3>Merge back into main when you're satisfied</h3>
+  <div class="code-block">
+    <div class="code-label mac-only">Terminal</div>
+    <div class="code-label win-only">Git Bash</div>
+    <pre>git checkout main
+git merge my-first-branch
+git push</pre>
+  </div>
+
+  <h2>Worktrees: Truly Working in Parallel</h2>
+  <p>Branches are great, but switching between them means stopping what you're doing and changing context. <strong>Worktrees</strong> solve this — they let you have multiple branches checked out in separate folders <em>at the same time</em>.</p>
+  <p>With Claude Code, this is a game-changer. You can have Claude working on a new feature in one worktree while you review or test something else in another — no interruptions, no context switching.</p>
+
+  <h3>Create a new worktree with its own branch</h3>
+  <div class="code-block">
+    <div class="code-label mac-only">Terminal</div>
+    <div class="code-label win-only">Git Bash</div>
+    <pre>git worktree add -b feature-idea ../my-first-repo-feature</pre>
+  </div>
+  <p>This creates a new folder called <code>my-first-repo-feature</code> next to your main project, already on a new branch called <code>feature-idea</code>. Both folders share the same Git history.</p>
+
+  <h3>Work in the new worktree</h3>
+  <div class="code-block">
+    <div class="code-label mac-only">Terminal</div>
+    <div class="code-label win-only">Git Bash</div>
+    <pre>cd ../my-first-repo-feature
+<span class="comment"># Make changes, run Claude, commit — without touching your main folder</span></pre>
+  </div>
+
+  <h3>See all your active worktrees</h3>
+  <div class="code-block">
+    <div class="code-label mac-only">Terminal</div>
+    <div class="code-label win-only">Git Bash</div>
+    <pre>git worktree list</pre>
+  </div>
+
+  <h3>Merge and remove the worktree when done</h3>
+  <div class="code-block">
+    <div class="code-label mac-only">Terminal</div>
+    <div class="code-label win-only">Git Bash</div>
+    <pre>cd ../my-first-repo
+git merge feature-idea
+git push
+git worktree remove ../my-first-repo-feature</pre>
+  </div>
+
+  <div class="callout callout-note">
+    <div class="callout-label">📝 The Claude Code workflow</div>
+    <p>Before asking Claude to work on any significant change, create a new worktree. Claude works in its own folder, you can review the main project at the same time, and merging is a deliberate choice — not an accident.</p>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       MODULE 4
+  ════════════════════════════════════════════════════════ -->
+  <div class="module-header" id="module4">
+    <div class="module-number">04</div>
+    <div class="module-body"><div class="module-title">Claude Code Installation</div></div>
+  </div>
+
+  <h2>Create a Claude Account</h2>
+  <p>Claude Code requires a <strong>Claude Pro</strong> subscription or higher (Pro, Max, Team, or Enterprise).</p>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-body"><p>Go to <a href="https://claude.ai">claude.ai</a> and sign up or log in.</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><p>If you don't have a paid plan, go to <a href="https://claude.ai/upgrade">claude.ai/upgrade</a>. The Pro plan ($20/month) is sufficient for this tutorial.</p></div></div>
+  </div>
+
+  <h2>Install Claude Code</h2>
+  <div class="code-block">
+    <div class="code-label mac-only">Terminal</div>
+    <div class="code-label win-only">Git Bash</div>
+    <pre>curl -fsSL https://claude.ai/install.sh | bash</pre>
+  </div>
+  <p>This downloads and installs Claude Code automatically. It may take a minute or two.</p>
+
+  <h2>Verify the Installation</h2>
+  <div class="code-block">
+    <div class="code-label mac-only">Terminal — check version</div>
+    <div class="code-label win-only">Git Bash — check version</div>
+    <pre>claude --version</pre>
+  </div>
+  <p>You should see a version number. Then run the health check:</p>
+  <div class="code-block">
+    <div class="code-label mac-only">Terminal — health check</div>
+    <div class="code-label win-only">Git Bash — health check</div>
+    <pre>claude doctor</pre>
+  </div>
+  <p>Look for a message confirming everything is <strong>OK</strong>. If anything shows as failing, let your facilitator know.</p>
+
+  <div class="callout callout-success">
+    <div class="callout-label">✅ Done signal</div>
+    <p><code>claude doctor</code> passing is your confirmation for this module. You're fully installed and ready.</p>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       MODULE 5
+  ════════════════════════════════════════════════════════ -->
+  <div class="module-header" id="module5">
+    <div class="module-number">05</div>
+    <div class="module-body"><div class="module-title">First Steps with Claude Code</div></div>
+  </div>
+
+  <h2>Launch Claude Code</h2>
+  <p>Navigate into the tutorial repository you cloned earlier:</p>
+  <div class="code-block mac-only"><div class="code-label">Terminal</div><pre>cd ~/Desktop/claude-code-skills</pre></div>
+  <div class="code-block win-only"><div class="code-label">Git Bash</div><pre>cd ~/Desktop/claude-code-skills</pre></div>
+  <p>Launch Claude Code:</p>
+  <div class="code-block">
+    <div class="code-label mac-only">Terminal</div>
+    <div class="code-label win-only">Git Bash</div>
+    <pre>claude</pre>
+  </div>
+  <p>The first time you launch, you'll be prompted to log in with your Claude account — follow the on-screen instructions. This only happens once. Once authenticated you'll see the prompt:</p>
+  <div class="code-block"><div class="code-label">Claude Code prompt</div><pre>&gt;</pre></div>
+
+  <h2>Explore the Repository</h2>
+  <p>Instead of starting from scratch, ask Claude to explain what's already in this repository:</p>
+  <div class="code-block">
+    <div class="code-label">Your prompt to Claude</div>
+    <pre>Please explore this repository and give me a summary of how it's organized,
+what the main files and folders are, and what this project appears to do.</pre>
+  </div>
+  <p>Claude will read through the files and write you a plain-English summary. When it asks permission to read files, type <strong>y</strong> and press <strong class="mac-only">Return</strong><strong class="win-only">Enter</strong>.</p>
+
+  <h2>Ask a Follow-Up</h2>
+  <p>Once Claude responds, go deeper:</p>
+  <div class="code-block">
+    <div class="code-label">Your prompt to Claude</div>
+    <pre>Which file would be the best starting point to understand how this project works?</pre>
+  </div>
+  <p>This shows how Claude Code is conversational — it remembers everything it already explored in this session.</p>
+
+  <h2>Exiting and Resuming Sessions</h2>
+  <p>When you're done, exit the session:</p>
+  <div class="code-block"><div class="code-label">Claude Code</div><pre>/exit</pre></div>
+  <p>Claude Code saves your conversation automatically. Two ways to pick up where you left off:</p>
+
+  <h3>Resume the most recent session instantly</h3>
+  <div class="code-block">
+    <div class="code-label mac-only">Terminal</div>
+    <div class="code-label win-only">Git Bash</div>
+    <pre>claude --continue</pre>
+  </div>
+  <p>Reopens your last conversation with full context intact.</p>
+
+  <h3>Choose from past sessions</h3>
+  <div class="code-block"><div class="code-label">Inside Claude Code</div><pre>/resume</pre></div>
+  <p>Shows a list of past sessions — useful when you've been working across multiple projects or worktrees.</p>
+
+  <div class="callout callout-note">
+    <div class="callout-label">📝 Why this matters</div>
+    <p>Claude Code sessions can be long and context-rich. Being able to resume means you never lose your place — whether returning after a break or switching between a feature worktree and a bug fix.</p>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       WRAP-UP
+  ════════════════════════════════════════════════════════ -->
+  <div class="module-header" id="wrapup">
+    <div class="module-number">✓</div>
+    <div class="module-body"><div class="module-title">Wrap-Up</div></div>
+  </div>
+
+  <h2>You're Ready</h2>
+  <ul class="bullets">
+    <li><span class="mac-only">Terminal</span><span class="win-only">Git Bash</span> — navigate folders and run commands</li>
+    <li>Git — installed, configured, with a grasp of commits, branches, and worktrees</li>
+    <li>GitHub — account created, SSH authentication set up, code pushed to the cloud</li>
+    <li>Claude Code — installed, authenticated, verified, and you've had your first conversation</li>
+  </ul>
+
+
+  <hr class="divider">
+
+  <h2>Quick Reference: Commands You Learned Today</h2>
+  <table class="ref-table">
+    <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td>pwd</td><td>Show the folder you're currently in</td></tr>
+      <tr><td>ls</td><td>List files and folders at your current location</td></tr>
+      <tr><td>cd foldername</td><td>Move into a folder</td></tr>
+      <tr><td>cd ..</td><td>Go up one level</td></tr>
+      <tr><td class="mac-only">open .</td><td class="mac-only">Open the current folder in Finder</td></tr>
+      <tr><td class="win-only">explorer .</td><td class="win-only">Open the current folder in File Explorer</td></tr>
+      <tr><td>git --version</td><td>Check Git is installed</td></tr>
+      <tr><td>git config --list</td><td>View your Git configuration</td></tr>
+      <tr><td>git init</td><td>Start tracking a folder with Git</td></tr>
+      <tr><td>git clone &lt;url&gt;</td><td>Download a copy of a GitHub repository</td></tr>
+      <tr><td>git add .</td><td>Stage all changes for a snapshot</td></tr>      <tr><td>git status</td><td>Show what's staged and what's changed</td></tr>
+      <tr><td>git log --oneline</td><td>Show a compact history of commits</td></tr>
+      <tr><td>git commit -m "msg"</td><td>Save a snapshot with a description</td></tr>
+      <tr><td>git push</td><td>Upload your snapshots to GitHub</td></tr>
+      <tr><td>git branch</td><td>List branches and see which you're on</td></tr>
+      <tr><td>git checkout -b name</td><td>Create a new branch and switch to it</td></tr>
+      <tr><td>git checkout main</td><td>Switch back to the main branch</td></tr>
+      <tr><td>git merge branchname</td><td>Merge a branch into the current branch</td></tr>
+      <tr><td>git worktree add -b branch ../folder</td><td>Create a new worktree on its own branch</td></tr>
+      <tr><td>git worktree list</td><td>See all active worktrees</td></tr>
+      <tr><td>git worktree remove ../folder</td><td>Remove a worktree when done</td></tr>
+      <tr><td>ssh-keygen -t ed25519 -C "email"</td><td>Generate an SSH key pair</td></tr>
+      <tr><td>ssh -T git&#64;github.com</td><td>Test your GitHub SSH connection</td></tr>
+      <tr><td>claude --version</td><td>Check Claude Code is installed</td></tr>
+      <tr><td>claude doctor</td><td>Run a health check on Claude Code</td></tr>
+      <tr><td>claude</td><td>Start a Claude Code session</td></tr>
+      <tr><td>claude --continue</td><td>Resume your most recent session</td></tr>
+      <tr><td>/resume</td><td>Choose from past sessions (inside Claude Code)</td></tr>
+      <tr><td>/exit</td><td>Exit a Claude Code session</td></tr>
+    </tbody>
+  </table>
+
+  <div class="footer">
+    <p>See you at the tutorial 🚀</p>
+    <p style="margin-top:8px;color:#999">Claude Code Setup Session</p>
+  </div>
+
+</div>
+
+<script>
+  function setOS(os) {
+    document.body.className = 'os-' + os;
+    document.querySelectorAll('.os-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector('.os-btn[onclick="setOS(\'' + os + '\')"]').classList.add('active');
+  }
+
+  // Auto-detect OS on load
+  const isMac = navigator.platform.toUpperCase().includes('MAC') ||
+                navigator.userAgent.includes('Mac');
+  setOS(isMac ? 'mac' : 'win');
+</script>
+</body>
+</html>
