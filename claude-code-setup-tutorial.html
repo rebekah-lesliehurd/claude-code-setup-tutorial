@@ -467,9 +467,9 @@ ssh-add ~/.ssh/id_ed25519</pre></div>
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-body">
-        <p>Navigate to your Desktop:</p>
-        <div class="code-block mac-only"><div class="code-label">Terminal</div><pre>cd ~/Desktop</pre></div>
-        <div class="code-block win-only"><div class="code-label">Git Bash</div><pre>cd ~/Desktop</pre></div>
+        <p>Navigate to your home folder:</p>
+        <div class="code-block mac-only"><div class="code-label">Terminal</div><pre>cd ~</pre></div>
+        <div class="code-block win-only"><div class="code-label">Git Bash</div><pre>cd ~</pre></div>
       </div>
     </div>
     <div class="step">
@@ -518,11 +518,11 @@ ssh-add ~/.ssh/id_ed25519</pre></div>
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-body">
-        <p>Create a new project folder on your Desktop:</p>
+        <p>Create a new project folder in your home directory:</p>
         <div class="code-block">
           <div class="code-label mac-only">Terminal</div>
           <div class="code-label win-only">Git Bash</div>
-          <pre>cd ~/Desktop
+          <pre>cd ~
 mkdir my-first-repo
 cd my-first-repo</pre>
         </div>
@@ -643,15 +643,16 @@ git push</pre>
   <div class="code-block">
     <div class="code-label mac-only">Terminal</div>
     <div class="code-label win-only">Git Bash</div>
-    <pre>git worktree add -b feature-idea ../my-first-repo-feature</pre>
+    <pre>mkdir -p ../worktrees
+git worktree add -b feature-idea ../worktrees/feature-idea</pre>
   </div>
-  <p>This creates a new folder called <code>my-first-repo-feature</code> next to your main project, already on a new branch called <code>feature-idea</code>. Both folders share the same Git history.</p>
+  <p>This creates a new folder called <code>worktrees/feature-idea</code> next to your project, already on a new branch called <code>feature-idea</code>. Both folders share the same Git history.</p>
 
   <h3>Work in the new worktree</h3>
   <div class="code-block">
     <div class="code-label mac-only">Terminal</div>
     <div class="code-label win-only">Git Bash</div>
-    <pre>cd ../my-first-repo-feature
+    <pre>cd ../worktrees/feature-idea
 <span class="comment"># Make changes, run Claude, commit — without touching your main folder</span></pre>
   </div>
 
@@ -666,10 +667,10 @@ git push</pre>
   <div class="code-block">
     <div class="code-label mac-only">Terminal</div>
     <div class="code-label win-only">Git Bash</div>
-    <pre>cd ../my-first-repo
+    <pre>cd ~/my-first-repo
 git merge feature-idea
 git push
-git worktree remove ../my-first-repo-feature</pre>
+git worktree remove ../worktrees/feature-idea</pre>
   </div>
 
   <div class="callout callout-note">
@@ -731,8 +732,8 @@ git worktree remove ../my-first-repo-feature</pre>
 
   <h2>Launch Claude Code</h2>
   <p>Navigate into the tutorial repository you cloned earlier:</p>
-  <div class="code-block mac-only"><div class="code-label">Terminal</div><pre>cd ~/Desktop/claude-code-skills</pre></div>
-  <div class="code-block win-only"><div class="code-label">Git Bash</div><pre>cd ~/Desktop/claude-code-skills</pre></div>
+  <div class="code-block mac-only"><div class="code-label">Terminal</div><pre>cd ~/claude-code-skills</pre></div>
+  <div class="code-block win-only"><div class="code-label">Git Bash</div><pre>cd ~/claude-code-skills</pre></div>
   <p>Launch Claude Code:</p>
   <div class="code-block">
     <div class="code-label mac-only">Terminal</div>
@@ -823,9 +824,9 @@ what the main files and folders are, and what this project appears to do.</pre>
       <tr><td>git checkout -b name</td><td>Create a new branch and switch to it</td></tr>
       <tr><td>git checkout main</td><td>Switch back to the main branch</td></tr>
       <tr><td>git merge branchname</td><td>Merge a branch into the current branch</td></tr>
-      <tr><td>git worktree add -b branch ../folder</td><td>Create a new worktree on its own branch</td></tr>
+      <tr><td>git worktree add -b branch ../worktrees/folder</td><td>Create a new worktree on its own branch</td></tr>
       <tr><td>git worktree list</td><td>See all active worktrees</td></tr>
-      <tr><td>git worktree remove ../folder</td><td>Remove a worktree when done</td></tr>
+      <tr><td>git worktree remove ../worktrees/folder</td><td>Remove a worktree when done</td></tr>
       <tr><td>ssh-keygen -t ed25519 -C "email"</td><td>Generate an SSH key pair</td></tr>
       <tr><td>ssh -T git&#64;github.com</td><td>Test your GitHub SSH connection</td></tr>
       <tr><td>claude --version</td><td>Check Claude Code is installed</td></tr>

@@ -159,7 +159,7 @@ Hi username! You've successfully authenticated
 To *clone* a repository means to download a complete copy — including its full history — to your computer.
 
 ```
-cd ~/Desktop
+cd ~
 git clone git@github.com:WomenDefiningAI/claude-code-skills.git
 cd claude-code-skills
 ls
@@ -178,7 +178,7 @@ The `ls` output shows the files and folders inside the repository. In Module 5 y
 
 Create the project folder:
 ```
-cd ~/Desktop
+cd ~
 mkdir my-first-repo
 cd my-first-repo
 git init
@@ -247,14 +247,15 @@ Branches are great, but switching between them means stopping what you're doing.
 
 Create a new worktree with its own branch:
 ```
-git worktree add -b feature-idea ../my-first-repo-feature
+mkdir -p ../worktrees
+git worktree add -b feature-idea ../worktrees/feature-idea
 ```
 
-This creates a new folder `my-first-repo-feature` next to your main project, already on a new branch. Both folders share the same Git history.
+This creates a new folder `worktrees/feature-idea` next to your project, already on a new branch. Both folders share the same Git history.
 
 Work in the new worktree:
 ```
-cd ../my-first-repo-feature
+cd ../worktrees/feature-idea
 # Make changes, run Claude, commit — without touching your main folder
 ```
 
@@ -265,10 +266,10 @@ git worktree list
 
 Merge and remove when done:
 ```
-cd ../my-first-repo
+cd ~/my-first-repo
 git merge feature-idea
 git push
-git worktree remove ../my-first-repo-feature
+git worktree remove ../worktrees/feature-idea
 ```
 
 > 📝 **The Claude Code workflow:** Before asking Claude to work on any significant change, create a new worktree. Claude works in its own folder, you can review the main project at the same time, and merging is a deliberate choice — not an accident.
@@ -305,7 +306,7 @@ claude doctor
 
 Navigate into the tutorial repository:
 ```
-cd ~/Desktop/claude-code-skills
+cd ~/claude-code-skills
 ```
 
 Launch Claude Code:
@@ -385,9 +386,9 @@ You've set up:
 | `git checkout -b name` | Create a new branch and switch to it |
 | `git checkout main` | Switch back to the main branch |
 | `git merge branchname` | Merge a branch into the current branch |
-| `git worktree add -b branch ../folder` | Create a new worktree on its own branch |
+| `git worktree add -b branch ../worktrees/folder` | Create a new worktree on its own branch |
 | `git worktree list` | See all active worktrees |
-| `git worktree remove ../folder` | Remove a worktree when done |
+| `git worktree remove ../worktrees/folder` | Remove a worktree when done |
 | `ssh-keygen -t ed25519 -C "email"` | Generate an SSH key pair |
 | `ssh -T git@github.com` | Test your GitHub SSH connection |
 | `claude --version` | Check Claude Code is installed |
